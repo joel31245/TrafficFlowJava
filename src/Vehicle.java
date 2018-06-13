@@ -1,4 +1,5 @@
 // June 12, 2018 TODO: Reorder and rename variables that display unit information
+// June 13, 2018 TODO: Make the driving style and set comfortable acceleration. 
 
 
 public class Vehicle {
@@ -20,7 +21,7 @@ public class Vehicle {
 		int followRungeType;	/* [see accelFunct]	*/
 		int accelDriveType;		/* [scale] may be replaced by ruleFollow*/
 		int laneChangeType;		/* [scale] may be replaced by accelType	*/
-		int ruleFollowType;		/* [scale]								*/
+		float ruleFollowType;		/* [scale]								*/
 		
 		
     // CONSTRUCTORS
@@ -50,7 +51,7 @@ public class Vehicle {
 	    	followRungeType = rungeType; 	accelDriveType = aDriveType; 
 	    	laneChangeType = lnChangeType; 	ruleFollowType = ruleType;
 	    }
-    
+     
     
     // GENERAL MOTION METHODS
     	public double accelFunct( double velofCurr, double posofCurr, double y, double velInFront, double posInFront, double dt){
@@ -174,12 +175,29 @@ public class Vehicle {
 	    	// make density dependent
 	        maxAccel = 0.0;
 	    }// move this into a global
-	    public void ruleFollowing(){
-	    	// make peer pressure dependent
+	    	// sets the maximum velocity based on the rule following type.
+	    public void determineMaxSpeed(Lane lane){
+	    	/* make peer pressure dependent */
+	    	// scale dependency first
 	    	
+	    	// check if in correct range
+	    	if(ruleFollowType>1.95 || ruleFollowType<.95) {
+	    		System.out.println("Incorrect entry for ruleFollowType. Must be in range of .95 to 1.95. Switching to default of 1.0");
+	    		ruleFollowType = (float) 1.0;
+	    	}
+	    	else if(ruleFollowType>.95 && ruleFollowType<=1.0)
+	    		maxVel = ruleFollowType*lane.getSpeedLimit();
+	    	else if(ruleFollowType>1.0 && ruleFollowType<=1.7)
+	    		maxVel = lane.getSpeedLimit() + (5*5280.0/3600.0);
+	    		// add in a frequency factor for this. Most people don't always stay at +5 mph on open road
+	    	else if(ruleFollowType>1.7 && ruleFollowType<=1.9)
+	    		maxVel = lane.getSpeedLimit() + ((ruleFollowType%1.7)*10+10)*5280.0/3600.0;
+	    	else 
+	    		maxVel = lane.getSpeedLimit()*ruleFollowType;
 	    }
-	    public void laneChange(){
+	    public void laneChange(Lane currentLane, Lane newLane){
 	        // make density dependent
+	    	
 	    }
     
 	    
@@ -199,6 +217,6 @@ public class Vehicle {
     public int getVehFollowType(){return followRungeType;}		public void setVehFollowType(int fltp){followRungeType=fltp;}
     public int getAccelDriveType(){return accelDriveType;}		public void setAccelDriveType(int aDT) {accelDriveType=aDT;}
     public int getVehLaneChangeType(){return laneChangeType;}	public void setVehLaneChangeType(int lnchgtp){laneChangeType=lnchgtp;}
-    public int getVehRuleType(){return ruleFollowType;} 		public void setVehRuleType(int rlfltp){ruleFollowType=rlfltp;}
+    public float getVehRuleType(){return ruleFollowType;} 		public void setVehRuleType(float rlfltp){ruleFollowType=rlfltp;}
 
 }
