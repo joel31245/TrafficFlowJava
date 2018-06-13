@@ -19,25 +19,37 @@ public class Vehicle {
 		// Vehicle Styles and Rules
 		int followRungeType;	/* [see accelFunct]	*/
 		int accelDriveType;		/* [scale] may be replaced by ruleFollow*/
-		int lnChangeType;		/* [scale] may be replaced by accelType	*/
+		int laneChangeType;		/* [scale] may be replaced by accelType	*/
 		int ruleFollowType;		/* [scale]								*/
 		
 		
     // CONSTRUCTORS
-    public Vehicle(){
-        // Default constructor. 
-        // Vehicle specific parameters. 
-        lambda = 0.8; velocity = 0.0; maxAccel = 2.0*32.2; comfortAccel = 1.5*32.2; maxVel = 120*5280/3600; xPos = 0.0; length = 10;
-        followRungeType = 1; accelDriveType = 1; lnChangeType = 1; ruleFollowType = 1;
-    }
-    public Vehicle(double y, double velocity, double maxAcceleration, double comfortAcceleration, double maxVelocity,
-                   double xPos, double vehLength, 
-                   int followData, int aDType, int LaneData, int ruleData){
-        lambda = y; velocity = velocity; maxAccel = maxAcceleration; comfortAccel = comfortAcceleration; maxVel = maxVelocity;
-        xPos = xPos; length = vehLength;
-        followRungeType = followData; accelDriveType = aDType;
-        lnChangeType = LaneData;      ruleFollowType = ruleData;
-    }
+		// Default Constructor
+	    public Vehicle(){ 
+	        // Vehicle Real Motion
+	    	velocity = 0.0; 	xPos = 0.0; 	yLane = 0; 		crashflag = false;
+	        // Vehicle Motion Limits
+	    	maxAccel = 2.0*32.2;	maxVel = 120*5280.0/3600.0;		comfortAccel = 1.5*32.2;
+	    	// Vehicle Parameters
+	    	lambda = 0.8;		length = 15;
+	    	// Vehhicle Styles and Rules
+	    	followRungeType = 1; accelDriveType = 1; laneChangeType = 1; ruleFollowType = 100;
+	    }
+	    // Specific Constructor
+	    public Vehicle(double vel, double x, int yID, boolean crash,
+	    			   double maxA, double 	maxV, double comfortA,
+	    			   double lambdaY, double carLength,
+	    			   int rungeType, int aDriveType, int lnChangeType, int ruleType){
+	    	// Vehicle Real Motion
+	    	velocity = vel; 	xPos = x; 	yLane = yID;	crashflag = crash;
+	        // Vehicle Motion Limits
+	    	maxAccel = maxA;	maxVel = maxV;	comfortAccel = comfortA;
+	    	// Vehicle Parameters
+	    	lambda = lambdaY;	length = carLength;
+	    	// Vehhicle Styles and Rules
+	    	followRungeType = rungeType; 	accelDriveType = aDriveType; 
+	    	laneChangeType = lnChangeType; 	ruleFollowType = ruleType;
+	    }
     
     
     // GENERAL MOTION METHODS
@@ -186,7 +198,7 @@ public class Vehicle {
     
     public int getVehFollowType(){return followRungeType;}		public void setVehFollowType(int fltp){followRungeType=fltp;}
     public int getAccelDriveType(){return accelDriveType;}		public void setAccelDriveType(int aDT) {accelDriveType=aDT;}
-    public int getVehLaneChangeType(){return lnChangeType;}		public void setVehLaneChangeType(int lnchgtp){lnChangeType=lnchgtp;}
+    public int getVehLaneChangeType(){return laneChangeType;}	public void setVehLaneChangeType(int lnchgtp){laneChangeType=lnchgtp;}
     public int getVehRuleType(){return ruleFollowType;} 		public void setVehRuleType(int rlfltp){ruleFollowType=rlfltp;}
 
 }
