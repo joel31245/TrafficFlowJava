@@ -1,8 +1,3 @@
-/*
- * Simple speed diff creates difference in speed
- */
-package TrafficFlow;
-
 import java.io.*;
 import java.util.ArrayList;
 
@@ -13,11 +8,11 @@ import java.util.ArrayList;
  * // Results dictated by volume output for a specific road stretch plus time it takes for
    //     a single vehicle to cross boundaries.
    // Tool used to compare real traffic approximations. 
-   //     All measurements in feet. [American System.
+   //     All measurements in feet. [American System].
  */
 
-/* TODO:    - Make initial library of functions. Vehicle specific like real life. 
-            - Git functionality
+/* TODO:    - WORKING June 12, 2018 - Make initial library of functions. Vehicle specific like real life. 
+            - DONE June 12, 2018 - Git functionality 
             - Make Road making function
             - Start Assembly
             - Model I-10 section. 
@@ -26,25 +21,27 @@ import java.util.ArrayList;
         - Ability to switch imperial and metric.
 */
 
-public class PrimitiveTrafficFlow {
+public class TrafficFlow {
 	
-	public void singleLaneOps(ArrayList<Vehicle> convoy, Lane l1) {
+	public void singleLaneOps(ArrayList<Vehicle> convoy, Lane lane) {
 		double dt = .1;
 		double time = 0.0;
 		
 		for(time=0.0; time<60; time+=dt) {
 			// Adds the vehicle to the lanes and sets them on their way.
+			if(lane.getinputRate()%dt == 0) {
+				convoy.add(new Vehicle());
+			}
+			
 		}
 		
 	}
 
     public static void main(String[] args) throws IOException {
-        // Just the assembly stage. Dictates the flowrates of each lane/entrance
-        //  and outputs to a file / displays results. 
+        
         Vehicle car = new Vehicle();
-        ArrayList<Vehicle> laneInput = new ArrayList<Vehicle>;
-        
-        
+        ArrayList<Vehicle> laneInput = new ArrayList<Vehicle>();
+        Lane testLane = new Lane();
         
         System.out.println("Hello. Car Made");
     }
