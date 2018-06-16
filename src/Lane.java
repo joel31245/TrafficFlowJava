@@ -1,4 +1,6 @@
-// June 12, 2018 TODO: Reorder and Rename Variables that display unit information.
+import java.util.ArrayList;
+// June 12, 2018 TODO: Reorder and Rename Variables that display unit information. DONE
+// June 16, 2018 TODO: Vehicles local x position. 
 
 public class Lane {
 	
@@ -20,6 +22,8 @@ public class Lane {
 	    boolean exitAttached;
 	    boolean leftLaneChange;
 	    boolean rightLaneChange;
+	    // Cars assigned to this Lane
+	    ArrayList<Vehicle> myCars = new ArrayList<Vehicle>();
     
     
     // CONSTRUCTORS
@@ -55,6 +59,29 @@ public class Lane {
 	    public void display() {
 			
 		}
+	    //simply adds cars that get passed into the method to its individual arraylist
+	    public void addVehicleToLane(Vehicle car) { myCars.add(car); }
+	    public void removeVehicleFromLane(Vehicle car) { myCars.remove(car); }
+	    public void autoRemoveVehicleFromLane() { // change to local xPos
+	    	if(myCars.size()>1)
+	    		if( myCars.get( 0 ).getxPos()>length )
+	    				removeVehicleFromLane(myCars.get( 0 ));
+	    }
+	    public boolean detectCrash() {
+	    	boolean crashDetected = false;
+	    	
+	    	// check if ArrayList is empty
+	    	if(myCars.size() >= 2) {
+	    		// check if overlapping positions. Start with presorted arrayList. Cars further down are first.
+	    		for( int i=0; i<myCars.size()-1; i++ ) {
+	    			if( myCars.get(i).getxPos() - myCars.get(i).getLength() < myCars.get(i+1).getxPos() )
+	    				crashDetected = true;
+	    		}
+	    	}
+	    	
+	    	return crashDetected;
+	    }
+	    
 	    
 	// GETTERS AND SETTERS
 	    public double getinputRate() 	{ return inputRate; }				public void setInputRate(double input)	{ inputRate = input; }

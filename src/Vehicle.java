@@ -1,5 +1,6 @@
-// June 12, 2018 TODO: Reorder and rename variables that display unit information
+// June 12, 2018 TODO: Reorder and rename variables that display unit information. DONE
 // June 13, 2018 TODO: Make the driving style and set comfortable acceleration. 
+// June 16, 2018 TODO: Make localxPos Workable for the lanes.
 
 
 public class Vehicle {
@@ -8,6 +9,7 @@ public class Vehicle {
 	    // Vehicle Real Motion
 		double 	velocity;	/* [ft/s]	*/ 
 		double 	xPos;		/* [ft]		*/
+		double 	localxPos;	/* [ft]		*/
 		int 	yLane;		/* [ID#] 	*/
 		boolean crashflag;	/* stops veh*/
 		// Vehicle Motion Limits
@@ -28,7 +30,7 @@ public class Vehicle {
 		// Default Constructor
 	    public Vehicle(){ 
 	        // Vehicle Real Motion
-	    	velocity = 0.0; 	xPos = 0.0; 	yLane = 0; 		crashflag = false;
+	    	velocity = 0.0; 	xPos = 0.0;		localxPos = 0.0; 	yLane = 0; 		crashflag = false;
 	        // Vehicle Motion Limits
 	    	maxAccel = 2.0*32.2;	maxVel = 120*5280.0/3600.0;		comfortAccel = 1.5*32.2;
 	    	// Vehicle Parameters
@@ -121,6 +123,7 @@ public class Vehicle {
 	        if(xNew >= xPosInFront + lengthVehinFront){
 	            crashflag = true;
 	            velocity = 0.0;
+	            //localxPos = xNew - xPos;
 	            xPos = xNew;
 	        }
 	        else {
@@ -204,6 +207,7 @@ public class Vehicle {
     // GETTERS AND SETTERS
     public double getVelocity(){return velocity;} 	public void setVelocity(double vel){velocity=vel;}
     public double getxPos(){return xPos;} 			public void setxPos(double x){xPos=x;}
+    public double getlocalxPos() { return localxPos; }	public void setlocalxPos(double localx){localxPos=localx;}
     public int 	  getyLane(){return yLane;}			public void setyLane(int y){yLane=y;}
     public boolean getCrashFlag(){return crashflag;}public void setCrashFlag(boolean crash){crashflag=crash;}
     
