@@ -123,11 +123,12 @@ public class Vehicle {
 	        if(xNew >= xPosInFront + lengthVehinFront){
 	            crashflag = true;
 	            velocity = 0.0;
-	            //localxPos = xNew - xPos;
+	            localxPos = localxPos + (xNew - xPos);
 	            xPos = xNew;
 	        }
 	        else {
 	        	velocity = vNew;
+	        	localxPos = localxPos + (xNew - xPos);
 	        	xPos = xNew;
 	        }
 	        
@@ -165,7 +166,9 @@ public class Vehicle {
 	            vNew = velocity;
 	        }
 	        double xNew = xPos + dt*vNew;
-	        velocity = vNew; xPos = xNew;
+	        velocity = vNew; 
+	        localxPos = localxPos + (xNew - xPos);
+	        xPos = xNew;
 	        
 	        return crashflag;
     	}

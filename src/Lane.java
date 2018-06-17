@@ -63,26 +63,26 @@ public class Lane {
 			
 		}
 	    //simply adds cars that get passed into the method to its individual arraylist
-	    public void addVehicleToLane(Vehicle car) { 
+	    public void addVehicleToLane(Vehicle car, double localx) { 
 	    	myCars.add(car);
+	    	myCars.get( myCars.size()-1 ).setlocalxPos(localx);
+	    	
 	    	if(myCars.size()>1 && myCars.get( myCars.size()-1 ).getlocalxPos()>5 ) {
 	    		Vehicle temp;
-	    		for(int i=0; i<myCars.size(); i++) {
-	    			for(int j=0; j<i-1; j++) {
+	    		for(int i=0; i<myCars.size(); i++)
+	    			for(int j=0; j<i-1; j++)
 	    				if( myCars.get(j).getlocalxPos() < myCars.get(j+1).getlocalxPos() ) {
 	    					temp = myCars.get(j);
 	    					myCars.set(j, myCars.get(j+1) );
 	    					myCars.set(j+1, temp);
 	    				}
-	    			}
-	    		}
 	    	} // end of sorting block
 	    }
 	    public void autoAddInputRate(double time) {
 	    	if( myCars.get( myCars.size()-1 ).getlocalxPos() - myCars.get( myCars.size()-1 ).getLength() < 5)
 	    		if( time%inputRate == 0.0 ) {
 	    			Vehicle car = new Vehicle();
-	    			addVehicleToLane( car );
+	    			addVehicleToLane( car, 0.0 );
 	    			myCars.get( myCars.size()-1 ).setVelocity( inputSpeed );
 	    		}
 	    }
