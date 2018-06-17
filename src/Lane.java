@@ -7,6 +7,7 @@ public class Lane {
 	// VARIABLES
 	    // Input Variables (Input/Output Rates)
 	    double 	inputRate;		/* [car/s]	*/
+	    double 	inputSpeed;		/* [ft/s] 	*/
 	    // Measurement Stats (Rates, Flow)
 	    double 	outputRate;	 	/* [car/s]	*/
 	    double 	flowRate; 		/* [car/s]	*/
@@ -30,6 +31,7 @@ public class Lane {
 	    public Lane(){
 	    	// Input Variables
 	    	inputRate = 1.0;
+	    	inputSpeed = 35*5280.0/3600.0;
 	    	// Measurement Stats
 	    	// General Settings
 	    	length = 5280.0;
@@ -39,11 +41,12 @@ public class Lane {
 	    	inputAttached = false;	exitAttached = false;
 	    	leftLaneChange = false;	rightLaneChange = false;
 	    }
-	    public Lane(double inptRate, 
+	    public Lane(double inptRate, double inptSpd,
 	                double laneLength, 	int laneHeading, 	double laneSpeedLimit,
 	                boolean iAttach, 	boolean eAttach,	boolean leftCross, 	boolean rightCross){
 	        // Input Variables
 	    	inputRate = inptRate;
+	    	inputSpeed = inptSpd;
 	    	// Measurement Stats
 	    	// General Settings
 	        length = laneLength;    
@@ -60,11 +63,33 @@ public class Lane {
 			
 		}
 	    //simply adds cars that get passed into the method to its individual arraylist
-	    public void addVehicleToLane(Vehicle car) { myCars.add(car); }
+	    public void addVehicleToLane(Vehicle car) { 
+	    	myCars.add(car);
+	    	if(myCars.size()>1 && myCars.get( myCars.size()-1 ).getlocalxPos()>5 ) {
+	    		Vehicle temp;
+	    		for(int i=0; i<myCars.size(); i++) {
+	    			for(int j=0; j<i-1; j++) {
+	    				if( myCars.get(j).getlocalxPos() < myCars.get(j+1).getlocalxPos() ) {
+	    					temp = myCars.get(j);
+	    					myCars.set(j, myCars.get(j+1) );
+	    					myCars.set(j+1, temp);
+	    				}
+	    			}
+	    		}
+	    	} // end of sorting block
+	    }
+	    public void autoAddInputRate(double time) {
+	    	if( myCars.get( myCars.size()-1 ).getlocalxPos() - myCars.get( myCars.size()-1 ).getLength() < 5)
+	    		if( time%inputRate == 0.0 ) {
+	    			Vehicle car = new Vehicle();
+	    			addVehicleToLane( car );
+	    			myCars.get( myCars.size()-1 ).setVelocity( inputSpeed );
+	    		}
+	    }
 	    public void removeVehicleFromLane(Vehicle car) { myCars.remove(car); }
 	    public void autoRemoveVehicleFromLane() { // change to local xPos
 	    	if(myCars.size()>1)
-	    		if( myCars.get( 0 ).getxPos()>length )
+	    		if( myCars.get( 0 ).getlocalxPos()>length )
 	    				removeVehicleFromLane(myCars.get( 0 ));
 	    }
 	    public boolean detectCrash() {
@@ -85,6 +110,7 @@ public class Lane {
 	    
 	// GETTERS AND SETTERS
 	    public double getinputRate() 	{ return inputRate; }				public void setInputRate(double input)	{ inputRate = input; }
+	    public double getinputSpeed()	{ return inputSpeed; }				public void setInputSpeed(double s) 	{ inputSpeed = s; }
 	    
 	    public double getOutputRate() 	{ return outputRate; }				public void setOutputRate(double output) {outputRate = output; }
 	    public double getflowRate() 	{ return flowRate; }				public void setFlowRate(double flow)	{ flowRate = flow; }
