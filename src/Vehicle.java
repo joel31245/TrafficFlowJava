@@ -17,8 +17,8 @@ public class Vehicle {
 		double 	maxVel;		/* [ft/s]	*/
 		double 	comfortAccel;/*[ft/s2]	*/
 		// Vehicle Parameters
-		double lambda;	/* [constant]	*/
-		double length;	/* [ft] 	*/
+		double lambda;		/* [constant]*/
+		double length;		/* [ft] 	*/
 		// Vehicle Styles and Rules
 		int followRungeType;	/* [see accelFunct]	*/
 		int accelDriveType;		/* [scale] may be replaced by ruleFollow*/
@@ -54,7 +54,40 @@ public class Vehicle {
 	    	laneChangeType = lnChangeType; 	ruleFollowType = ruleType;
 	    }
      
+	    
+	 // STYLE SPECIFIC MOTION 
+    	// Need driving style, rule following, lane changing type. 
+        // Based on the rule following type of person changes max allowable acceleration
+	    public void drivingStyle(){
+	    	// make density dependent
+	        maxAccel = 0.0;
+	    }// move this into a global
+	    	// sets the maximum velocity based on the rule following type.
+	    public void determineMaxSpeed(Lane lane){
+	    	/* make peer pressure dependent */
+	    	// scale dependency first
+	    	
+	    	// check if in correct range
+	    	if(ruleFollowType>1.95 || ruleFollowType<.95) {
+	    		System.out.println("Incorrect entry for ruleFollowType. Must be in range of .95 to 1.95. Switching to default of 1.0");
+	    		ruleFollowType = (float) 1.0;
+	    	}
+	    	else if(ruleFollowType>.95 && ruleFollowType<=1.0)
+	    		maxVel = ruleFollowType*lane.getSpeedLimit();
+	    	else if(ruleFollowType>1.0 && ruleFollowType<=1.7)
+	    		maxVel = lane.getSpeedLimit() + (5*5280.0/3600.0);
+	    		// add in a frequency factor for this. Most people don't always stay at +5 mph on open road
+	    	else if(ruleFollowType>1.7 && ruleFollowType<=1.9)
+	    		maxVel = lane.getSpeedLimit() + ((ruleFollowType%1.7)*10+10)*5280.0/3600.0;
+	    	else 
+	    		maxVel = lane.getSpeedLimit()*ruleFollowType;
+	    }
+	    public void laneChange(Lane currentLane, Lane newLane){
+	        // make density dependent
+	    	
+	    }
     
+	    
     // GENERAL MOTION METHODS
     	public double accelFunct( double velofCurr, double posofCurr, double y, double velInFront, double posInFront, double dt){
 	        double vNew;
@@ -120,6 +153,7 @@ public class Vehicle {
 	        
 	        xNew = xPos   +   dt/6*(velocity + 2*vStar + 2*vStar2 + vStar3);
 	        
+	        if(vNew>maxVel)   vNew = maxVel;
 	        if(xNew >= xPosInFront + lengthVehinFront){
 	            crashflag = true;
 	            velocity = 0.0;
@@ -135,7 +169,7 @@ public class Vehicle {
 	        return crashflag;
 	    }
     		// Runge Kutta Default (no people up front)
-    	public boolean rungKutta(double dt){
+    	public void rungKutta(double dt){
 	        /*double vStar, vStar2, vStar3, vNew,
 	               xStar, xStar2, xStar3, xNew;
 	        
@@ -170,42 +204,9 @@ public class Vehicle {
 	        localxPos = localxPos + (xNew - xPos);
 	        xPos = xNew;
 	        
-	        return crashflag;
+	        //return crashflag;
     	}
 
-    
-    // STYLE SPECIFIC MOTION 
-    	// Need driving style, rule following, lane changing type. 
-        // Based on the rule following type of person changes max allowable acceleration
-	    public void drivingStyle(){
-	    	// make density dependent
-	        maxAccel = 0.0;
-	    }// move this into a global
-	    	// sets the maximum velocity based on the rule following type.
-	    public void determineMaxSpeed(Lane lane){
-	    	/* make peer pressure dependent */
-	    	// scale dependency first
-	    	
-	    	// check if in correct range
-	    	if(ruleFollowType>1.95 || ruleFollowType<.95) {
-	    		System.out.println("Incorrect entry for ruleFollowType. Must be in range of .95 to 1.95. Switching to default of 1.0");
-	    		ruleFollowType = (float) 1.0;
-	    	}
-	    	else if(ruleFollowType>.95 && ruleFollowType<=1.0)
-	    		maxVel = ruleFollowType*lane.getSpeedLimit();
-	    	else if(ruleFollowType>1.0 && ruleFollowType<=1.7)
-	    		maxVel = lane.getSpeedLimit() + (5*5280.0/3600.0);
-	    		// add in a frequency factor for this. Most people don't always stay at +5 mph on open road
-	    	else if(ruleFollowType>1.7 && ruleFollowType<=1.9)
-	    		maxVel = lane.getSpeedLimit() + ((ruleFollowType%1.7)*10+10)*5280.0/3600.0;
-	    	else 
-	    		maxVel = lane.getSpeedLimit()*ruleFollowType;
-	    }
-	    public void laneChange(Lane currentLane, Lane newLane){
-	        // make density dependent
-	    	
-	    }
-    
 	    
     // GETTERS AND SETTERS
     public double getVelocity(){return velocity;} 	public void setVelocity(double vel){velocity=vel;}

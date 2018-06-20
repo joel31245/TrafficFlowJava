@@ -1,5 +1,4 @@
 import java.io.*;
-import java.util.ArrayList;
 
 /**
  * @author Joel Chavali
@@ -23,27 +22,28 @@ import java.util.ArrayList;
 
 public class TrafficFlow {
 	
-	public void singleLaneOps(ArrayList<Vehicle> convoy, Lane lane) {
+	public static boolean testSingleLaneOps(Lane lane) {
 		double dt = .1;
 		double time = 0.0;
+		boolean crashflag = false;
 		
 		for(time=0.0; time<60; time+=dt) {
-			// Adds the vehicle to the lanes and sets them on their way.
-			if(lane.getinputRate()%dt == 0) {
-				convoy.add(new Vehicle());
-			}
-			
+			lane.autoAddInputRate(time);
+			crashflag = lane.updateLaneDefault(dt);
 		}
 		
+		return crashflag;
 	}
 
     public static void main(String[] args) throws IOException {
-        
-        Vehicle car = new Vehicle();
-        ArrayList<Vehicle> laneInput = new ArrayList<Vehicle>();
+
         Lane testLane = new Lane();
         
-        System.out.println("Hello. Car Made");
+        boolean crashTestSingleLane = testSingleLaneOps( testLane );
+        if( crashTestSingleLane == true) 	System.out.println("Crash Reported for Single Ops Lane Test.");
+        else								System.out.println("Single Ops successfully executed.");
+
+        System.out.println("Succesful Execution. Terminating Program.");
     }
     
 }

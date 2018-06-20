@@ -25,6 +25,7 @@ public class Lane {
 	    boolean rightLaneChange;
 	    // Cars assigned to this Lane
 	    ArrayList<Vehicle> myCars = new ArrayList<Vehicle>();
+	    	// NOTE: Requires a special order. First in ArrayList is furthest down (highest localxPos).
     
     
     // CONSTRUCTORS
@@ -67,6 +68,7 @@ public class Lane {
 	    	myCars.add(car);
 	    	myCars.get( myCars.size()-1 ).setlocalxPos(localx);
 	    	
+	    	// sorting block puts car farthest down the lane (highest localxPos) first in the arrayList
 	    	if(myCars.size()>1 && myCars.get( myCars.size()-1 ).getlocalxPos()>5 ) {
 	    		Vehicle temp;
 	    		for(int i=0; i<myCars.size(); i++)
@@ -79,7 +81,15 @@ public class Lane {
 	    	} // end of sorting block
 	    }
 	    public void autoAddInputRate(double time) {
-	    	if( myCars.get( myCars.size()-1 ).getlocalxPos() - myCars.get( myCars.size()-1 ).getLength() < 5)
+	    	if( myCars.size() >= 1) {
+		    	if( myCars.get( myCars.size()-1 ).getlocalxPos() - myCars.get( myCars.size()-1 ).getLength() < 5)
+		    		if( time%inputRate == 0.0 ) {
+		    			Vehicle car = new Vehicle();
+		    			addVehicleToLane( car, 0.0 );
+		    			myCars.get( myCars.size()-1 ).setVelocity( inputSpeed );
+		    		}
+	    	}
+	    	else 
 	    		if( time%inputRate == 0.0 ) {
 	    			Vehicle car = new Vehicle();
 	    			addVehicleToLane( car, 0.0 );
@@ -92,12 +102,12 @@ public class Lane {
 	    		if( myCars.get( 0 ).getlocalxPos()>length )
 	    				removeVehicleFromLane(myCars.get( 0 ));
 	    }
-	    public boolean detectCrash() {
+	    public boolean detectCrash() { 				// Backup tester if it needs to be tested at any time. Needs presorted arrayList
 	    	boolean crashDetected = false;
 	    	
 	    	// check if ArrayList is empty
 	    	if(myCars.size() >= 2) {
-	    		// check if overlapping positions. Start with presorted arrayList. Cars further down are first.
+	    		// check if overlapping positions.
 	    		for( int i=0; i<myCars.size()-1; i++ ) {
 	    			if( myCars.get(i).getxPos() - myCars.get(i).getLength() < myCars.get(i+1).getxPos() )
 	    				crashDetected = true;
@@ -105,6 +115,24 @@ public class Lane {
 	    	}
 	    	
 	    	return crashDetected;
+	    }
+	    public boolean updateLaneDefault(double dt) {
+	    	boolean crash = false;
+	    	if( myCars.size()>0 ) {
+	    		
+	    		myCars.get(0).rungKutta(dt);
+	    		if( myCars.size()>1) {
+	    			// Step 1 is check distances between cars. > 10 seconds no forward checker
+	    			for( int i=1; i<myCars.size(); i++) {
+	    				Vehicle frontCar = myCars.get(i-1);
+	    				if( myCars.get(i).getlocalxPos() - ( frontCar.getlocalxPos()+frontCar.getLength() )  <= speedLimit*10 )
+	    					crash = myCars.get(i).rungKutta(dt, frontCar.getlocalxPos(), frontCar.getVelocity(), frontCar.getLength() );
+	    				else
+	    					myCars.get(i).rungKutta(dt);
+	    			}
+	    		} // end of multiple cars in lane
+	    	}
+	    	return crash;
 	    }
 	    
 	    
