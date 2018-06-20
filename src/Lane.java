@@ -1,6 +1,6 @@
 import java.util.ArrayList;
-// June 12, 2018 TODO: Reorder and Rename Variables that display unit information. DONE
-// June 16, 2018 TODO: Vehicles local x position. 
+// June 12, 2018 TODO: [DONE] Reorder and Rename Variables that display unit information. DONE
+// June 16, 2018 TODO: [DONE] Vehicles local x position. 
 
 public class Lane {
 	
@@ -87,6 +87,8 @@ public class Lane {
 		    			Vehicle car = new Vehicle();
 		    			addVehicleToLane( car, 0.0 );
 		    			myCars.get( myCars.size()-1 ).setVelocity( inputSpeed );
+		    			myCars.get( myCars.size()-1 ).setVehRuleType( (float)(Math.random()+.95) );
+		    			myCars.get( myCars.size()-1 ).determineMaxSpeed(speedLimit);
 		    		}
 	    	}
 	    	else 
@@ -94,6 +96,8 @@ public class Lane {
 	    			Vehicle car = new Vehicle();
 	    			addVehicleToLane( car, 0.0 );
 	    			myCars.get( myCars.size()-1 ).setVelocity( inputSpeed );
+	    			myCars.get( myCars.size()-1 ).setVehRuleType( (float)(Math.random()+.95) );
+	    			myCars.get( myCars.size()-1 ).determineMaxSpeed(speedLimit);
 	    		}
 	    }
 	    public void removeVehicleFromLane(Vehicle car) { myCars.remove(car); }

@@ -2,6 +2,8 @@
 // June 13, 2018 TODO: Make the driving style and set comfortable acceleration. 
 // June 16, 2018 TODO: Make localxPos Workable for the lanes.
 
+// [1] make density dependent (ruleFollowing), [2] make +5 mph frequency variable (ruleFollowing)
+
 
 public class Vehicle {
 	
@@ -13,7 +15,7 @@ public class Vehicle {
 		int 	yLane;		/* [ID#] 	*/
 		boolean crashflag;	/* stops veh*/
 		// Vehicle Motion Limits
-		double 	maxAccel;	/* [ft/s2]	*/
+		double 	maxAccel = 4.0*32.3;	/* [ft/s2]	*/ 	/* MAXIMUM G: 4 g's */
 		double 	maxVel;		/* [ft/s]	*/
 		double 	comfortAccel;/*[ft/s2]	*/
 		// Vehicle Parameters
@@ -21,9 +23,9 @@ public class Vehicle {
 		double length;		/* [ft] 	*/
 		// Vehicle Styles and Rules
 		int followRungeType;	/* [see accelFunct]	*/
-		int accelDriveType;		/* [scale] may be replaced by ruleFollow*/
+		float accelDriveType;	/* [scale] may be replaced by ruleFollow*/
 		int laneChangeType;		/* [scale] may be replaced by accelType	*/
-		float ruleFollowType;		/* [scale]								*/
+		float ruleFollowType;	/* [scale]								*/
 		
 		
     // CONSTRUCTORS
@@ -46,7 +48,7 @@ public class Vehicle {
 	    	// Vehicle Real Motion
 	    	velocity = vel; 	xPos = x; 	yLane = yID;	crashflag = crash;
 	        // Vehicle Motion Limits
-	    	maxAccel = maxA;	maxVel = maxV;	comfortAccel = comfortA;
+	    	maxAccel = 4.0*32.2;	maxVel = maxV;	comfortAccel = comfortA;
 	    	// Vehicle Parameters
 	    	lambda = lambdaY;	length = carLength;
 	    	// Vehhicle Styles and Rules
@@ -56,14 +58,26 @@ public class Vehicle {
      
 	    
 	 // STYLE SPECIFIC MOTION 
-    	// Need driving style, rule following, lane changing type. 
         // Based on the rule following type of person changes max allowable acceleration
 	    public void drivingStyle(){
 	    	// make density dependent
-	        maxAccel = 0.0;
-	    }// move this into a global
+	    	
+	    	// check if in correct range
+	    	if(accelDriveType>1.95 || accelDriveType<.95) {
+	    		System.out.println("Incorrect entry for comfort acceleration. Must be in range of .95 to 1.95. Switching to default of 1.0");
+	    		accelDriveType = (float) 1.0;
+	    	}
+	    	else if(accelDriveType>.95 && accelDriveType<=1.0)
+	    		comfortAccel = accelDriveType*32.2;
+	    	else if(accelDriveType>1.0 && accelDriveType<=1.7)
+	    		comfortAccel = accelDriveType*accelDriveType*32.2;
+	    	else if(accelDriveType>1.7 && accelDriveType<=1.9)
+	    		comfortAccel = (accelDriveType-1)*maxAccel;
+	    	else 
+	    		comfortAccel = accelDriveType*32.2;
+	    }
 	    	// sets the maximum velocity based on the rule following type.
-	    public void determineMaxSpeed(Lane lane){
+	    public void determineMaxSpeed(double speedLimit){
 	    	/* make peer pressure dependent */
 	    	// scale dependency first
 	    	
@@ -73,14 +87,14 @@ public class Vehicle {
 	    		ruleFollowType = (float) 1.0;
 	    	}
 	    	else if(ruleFollowType>.95 && ruleFollowType<=1.0)
-	    		maxVel = ruleFollowType*lane.getSpeedLimit();
+	    		maxVel = ruleFollowType*speedLimit;
 	    	else if(ruleFollowType>1.0 && ruleFollowType<=1.7)
-	    		maxVel = lane.getSpeedLimit() + (5*5280.0/3600.0);
+	    		maxVel = speedLimit + (5*5280.0/3600.0);
 	    		// add in a frequency factor for this. Most people don't always stay at +5 mph on open road
 	    	else if(ruleFollowType>1.7 && ruleFollowType<=1.9)
-	    		maxVel = lane.getSpeedLimit() + ((ruleFollowType%1.7)*10+10)*5280.0/3600.0;
+	    		maxVel = speedLimit + ((ruleFollowType%1.7)*10+10)*5280.0/3600.0;
 	    	else 
-	    		maxVel = lane.getSpeedLimit()*ruleFollowType;
+	    		maxVel = speedLimit*ruleFollowType;
 	    }
 	    public void laneChange(Lane currentLane, Lane newLane){
 	        // make density dependent
@@ -223,7 +237,7 @@ public class Vehicle {
     public double getLength(){return length;}
     
     public int getVehFollowType(){return followRungeType;}		public void setVehFollowType(int fltp){followRungeType=fltp;}
-    public int getAccelDriveType(){return accelDriveType;}		public void setAccelDriveType(int aDT) {accelDriveType=aDT;}
+    public float getAccelDriveType(){return accelDriveType;}	public void setAccelDriveType(float aDT) {accelDriveType=aDT;}
     public int getVehLaneChangeType(){return laneChangeType;}	public void setVehLaneChangeType(int lnchgtp){laneChangeType=lnchgtp;}
     public float getVehRuleType(){return ruleFollowType;} 		public void setVehRuleType(float rlfltp){ruleFollowType=rlfltp;}
 
