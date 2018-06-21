@@ -1,6 +1,8 @@
 import java.util.ArrayList;
+import java.lang.Math;
 // June 12, 2018 TODO: [DONE] Reorder and Rename Variables that display unit information. DONE
 // June 16, 2018 TODO: [DONE] Vehicles local x position. 
+// June 20, 2018 TODO: How to make Lanes communicate with each other for vehicles at end of one and beg. of other
 
 public class Lane {
 	
@@ -16,7 +18,7 @@ public class Lane {
 	    double 	timeThrough;	/* [s]		*/
 	    // General Settings
 	    double 	length;			/* [ft]		*/
-	    int 	heading;		/* [degrees]*/
+	    int 	heading;		/* [degrees]*/ 			// ( 0, 90, 180, 270) (north, east, south, west)
 	    double 	speedLimit;		/* [ft/s]	*/
 	    // Lane Attachment Points and Routing
 	    boolean inputAttached;
@@ -130,15 +132,16 @@ public class Lane {
 	    	boolean crash = false;
 	    	if( myCars.size()>0 ) {
 	    		
-	    		myCars.get(0).rungKutta(dt);
+	    		myCars.get(0).rungKutta(heading, dt);
 	    		if( myCars.size()>1) {
 	    			// Step 1 is check distances between cars. > 10 seconds no forward checker
 	    			for( int i=1; i<myCars.size(); i++) {
+	    				Vehicle thisCar = myCars.get(i);
 	    				Vehicle frontCar = myCars.get(i-1);
-	    				if( myCars.get(i).getlocalxPos() - ( frontCar.getlocalxPos()+frontCar.getLength() )  <= speedLimit*10 )
-	    					crash = myCars.get(i).rungKutta(dt, frontCar.getlocalxPos(), frontCar.getVelocity(), frontCar.getLength() );
+	    				if( thisCar.getlocalxPos() - ( frontCar.getlocalxPos()+frontCar.getLength() )  <= thisCar.getLength()*10 )
+	    					crash = thisCar.rungKutta(heading, dt, frontCar.getlocalxPos(), frontCar.getVelocity(), frontCar.getLength() );
 	    				else
-	    					myCars.get(i).rungKutta(dt);
+	    					thisCar.rungKutta(heading, dt);
 	    			}
 	    		} // end of multiple cars in lane
 	    	}

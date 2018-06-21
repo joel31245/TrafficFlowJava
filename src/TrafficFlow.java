@@ -12,6 +12,7 @@ import java.io.*;
 
 /* TODO:    - WORKING June 12, 2018 - Make initial library of functions. Vehicle specific like real life. 
             - DONE June 12, 2018 - Git functionality 
+            - Make a seperate CurveLane for nonlinear lanes.
             - Create text IO
             - Create GUI IO
             - Move rungeKuttas to main to decrease size and increase efficiency?

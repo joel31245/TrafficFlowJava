@@ -1,6 +1,6 @@
-// June 12, 2018 TODO: Reorder and rename variables that display unit information. DONE
-// June 13, 2018 TODO: Make the driving style and set comfortable acceleration. 
-// June 16, 2018 TODO: Make localxPos Workable for the lanes.
+// June 12, 2018 TODO: [DONE] Reorder and rename variables that display unit information. DONE
+// June 13, 2018 TODO: [DONE] Make the driving style and set comfortable acceleration. 
+// June 16, 2018 TODO: [DONE] Make localxPos Workable for the lanes.
 
 // [1] make density dependent (ruleFollowing), [2] make +5 mph frequency variable (ruleFollowing)
 
@@ -11,10 +11,11 @@ public class Vehicle {
 		double 	velocity;	/* [ft/s]	*/ 
 		double 	xPos;		/* [ft]		*/
 		double 	localxPos;	/* [ft]		*/
-		int 	yLane;		/* [ID#] 	*/
+		double 	yPos;		/* [ft] 	*/
+		int 	heading;	/* [degrees]*/ 				// only if needed.
 		boolean crashflag;	/* stops veh*/
 		// Vehicle Motion Limits
-		double 	maxAccel = 4.0*32.3;	/* [ft/s2]	*/ 	/* MAXIMUM G: 4 g's */
+		final double MAXACCEL = 4.0*32.3;	/* [ft/s2]	*/ 	/* MAXIMUM G: 4 g's */
 		double 	maxVel;		/* [ft/s]	*/
 		double 	comfortAccel;/*[ft/s2]	*/
 		// Vehicle Parameters
@@ -31,23 +32,23 @@ public class Vehicle {
 		// Default Constructor
 	    public Vehicle(){ 
 	        // Vehicle Real Motion
-	    	velocity = 0.0; 	xPos = 0.0;		localxPos = 0.0; 	yLane = 0; 		crashflag = false;
+	    	velocity = 0.0; 	xPos = 0.0;		localxPos = 0.0; 	yPos = 0.0; 		crashflag = false;
 	        // Vehicle Motion Limits
-	    	maxAccel = 4.0*32.2;	maxVel = 120*5280.0/3600.0;		comfortAccel = 1.5*32.2;
+	    	maxVel = 120*5280.0/3600.0;		comfortAccel = 1.5*32.2;
 	    	// Vehicle Parameters
 	    	lambda = 0.8;		length = 15;
 	    	// Vehhicle Styles and Rules
 	    	followRungeType = 1; accelDriveType = 1; laneChangeType = 1; ruleFollowType = 100;
 	    }
 	    // Specific Constructor
-	    public Vehicle(double vel, double x, int yID, boolean crash,
-	    			   double maxA, double 	maxV, double comfortA,
+	    public Vehicle(double vel, double x, double y, boolean crash,
+	    			   double 	maxV, double comfortA,
 	    			   double lambdaY, double carLength,
 	    			   int rungeType, int aDriveType, int lnChangeType, int ruleType){
 	    	// Vehicle Real Motion
-	    	velocity = vel; 	xPos = x; 	yLane = yID;	crashflag = crash;
+	    	velocity = vel; 	xPos = x; 	yPos = y;	crashflag = crash;
 	        // Vehicle Motion Limits
-	    	maxAccel = 4.0*32.2;	maxVel = maxV;	comfortAccel = comfortA;
+	    	maxVel = maxV;	comfortAccel = comfortA;
 	    	// Vehicle Parameters
 	    	lambda = lambdaY;	length = carLength;
 	    	// Vehhicle Styles and Rules
@@ -71,7 +72,7 @@ public class Vehicle {
 	    	else if(accelDriveType>1.0 && accelDriveType<=1.7)
 	    		comfortAccel = accelDriveType*accelDriveType*32.2;
 	    	else if(accelDriveType>1.7 && accelDriveType<=1.9)
-	    		comfortAccel = (accelDriveType-1)*maxAccel;
+	    		comfortAccel = (accelDriveType-1)*MAXACCEL;
 	    	else 
 	    		comfortAccel = accelDriveType*32.2;
 	    }
@@ -115,15 +116,15 @@ public class Vehicle {
 	        
 	        if( a<0 ) {
 	        	// uses basic rule of keep comfortable if separation distance is spd/10*carlengths.. 7.0ft/s is 10mph
-	        	if( a<-comfortAccel 	&& (posInFront-posofCurr)<Math.abs(vNew/7.0*length) 	&& a<-maxAccel )
-	        		vNew = velofCurr - maxAccel*dt;
+	        	if( a<-comfortAccel 	&& (posInFront-posofCurr)<Math.abs(vNew/7.0*length) 	&& a<-MAXACCEL )
+	        		vNew = velofCurr - MAXACCEL*dt;
 	        	else if( a<-comfortAccel 	&& (posInFront-posofCurr)<Math.abs(vNew/7.0*length) )
 	        		vNew = velofCurr - comfortAccel*dt;
 	        }
 	        if( a>0 ) {
 	        	// uses basic rule of keep comfortable if separation distance is spd/10*carlengths.. 7.0ft/s is 10mph
-	        	if( a>comfortAccel 		&& Math.abs(posInFront-posofCurr)<Math.abs(vNew/7.0*length) 	&& a>maxAccel )
-	        		vNew = velofCurr + maxAccel*dt;
+	        	if( a>comfortAccel 		&& Math.abs(posInFront-posofCurr)<Math.abs(vNew/7.0*length) 	&& a>MAXACCEL )
+	        		vNew = velofCurr + MAXACCEL*dt;
 	        	else if( a>comfortAccel 	&& Math.abs(posInFront-posofCurr)<Math.abs(vNew/7.0*length) )
 	        		vNew = velofCurr + comfortAccel*dt;
 	        }
@@ -131,73 +132,78 @@ public class Vehicle {
 	        
 	        return vNew;
 	    }
-		    // runge kutta method outputs both but methods only output a single thing. Unless, it can change it immediately. 
-		    // NOTE: Designed to update from front to back (x wise). NOT randomly nor any other order.
+		    // NOTE: Designed to update from front to back (localxPos wise). NOT randomly nor any other order.
 		    // Because method is specific to current vehicle, only need other veh params
-    	public boolean rungKutta(double dt, double xPosInFront, 
+    	public boolean rungKutta(int hdg, double dt, double xPosInFront, 
 	                                        double velInFront, 
 	                                        double lengthVehinFront){
 	        double vStar, vStar2, vStar3, vNew,
 	               xStar, xStar2, xStar3, xNew;
 	        
 	        // Method runs Runge Kutta 4th Order for the current vehicle.
-	        vStar = velocity + dt/2 * accelFunct(velocity, xPos, lambda, velInFront, xPosInFront, dt);
-	        xStar = xPos + dt/2 * velocity;
+	        vStar = velocity + dt/2 * accelFunct(velocity, localxPos, lambda, velInFront, xPosInFront, dt);
+	        xStar = localxPos + dt/2 * velocity;
 	
 	        vStar2 = velocity + dt/2 * accelFunct(vStar, xStar, lambda, velInFront, xPosInFront, dt);
-	        xStar2 = xPos + dt/2 * vStar;
+	        xStar2 = localxPos + dt/2 * vStar;
 	
 	        vStar3 = velocity + dt * accelFunct(vStar2, xStar, lambda, velInFront, xPosInFront, dt);
-	        xStar3 = xPos + dt * vStar2;
+	        xStar3 = localxPos + dt * vStar2;
 	
-	        vNew = velocity + dt/6 * (    accelFunct(velocity, xPos, lambda, velInFront, xPosInFront, dt)
+	        vNew = velocity + dt/6 * (    accelFunct(velocity, localxPos, lambda, velInFront, xPosInFront, dt)
 	               + 2 * accelFunct(vStar, xStar, lambda, velInFront, xPosInFront, dt) 
 	               + 2 * accelFunct(vStar2, xStar2, lambda, velInFront, xPosInFront, dt) 
 	               + accelFunct(vStar3, xStar3, lambda, velInFront, xPosInFront, dt)    );
 	        
-	        xNew = xPos   +   dt/6*(velocity + 2*vStar + 2*vStar2 + vStar3);
+	        xNew = localxPos   +   dt/6*(velocity + 2*vStar + 2*vStar2 + vStar3);
 	        
 	        if(vNew>maxVel)   vNew = maxVel;
 	        if(xNew >= xPosInFront + lengthVehinFront){
 	            crashflag = true;
 	            velocity = 0.0;
-	            localxPos = localxPos + (xNew - xPos);
-	            xPos = xNew;
+		        // determining x,y coordinates using heading
+	            	heading = hdg;
+	            	xPos = Math.abs(xNew-localxPos) * Math.cos( Math.toRadians(heading));
+	            	yPos = Math.abs(xNew-localxPos) * Math.sin( Math.toRadians(heading));
+	            localxPos = xNew;
 	        }
 	        else {
 	        	velocity = vNew;
-	        	localxPos = localxPos + (xNew - xPos);
-	        	xPos = xNew;
+	        	// determining x,y coordinates using heading
+            		heading = hdg;
+            		xPos = Math.abs(xNew-localxPos) * Math.cos( Math.toRadians(heading));
+            		yPos = Math.abs(xNew-localxPos) * Math.sin( Math.toRadians(heading));
+            	localxPos = xNew;
 	        }
 	        
 	        return crashflag;
 	    }
-    		// Runge Kutta Default (no people up front)
-    	public void rungKutta(double dt){
-	        /*double vStar, vStar2, vStar3, vNew,
-	               xStar, xStar2, xStar3, xNew;
-	        
-	        // Method runs Runge Kutta 4th Order for the current vehicle.
-	        vStar = velocity + dt/2 * ;
-	        xStar = xPos + dt/2 * velocity;
-	
-	        vStar2 = velocity + dt/2 * ;
-	        xStar2 = xPos + dt/2 * vStar;
-	
-	        vStar3 = velocity + dt * ;
-	        xStar3 = xPos + dt * vStar2;
-	
-	        vNew = velocity + dt/6 * 
-	               + 2 *  
-	               + 2 *  
-	               +     );
-	        
-	        xNew = xPos   +   dt/6*(velocity + 2*vStar + 2*vStar2 + vStar3);
-	        
-	        if(xNew >= xPosInFront + lengthVehinFront){
-	            crashflag = true;
-	        }
-	        */
+    		// Runge Kutta Default (no people within range up front)
+    	public void rungKutta(int hdg, double dt){
+					        /*double vStar, vStar2, vStar3, vNew,
+					               xStar, xStar2, xStar3, xNew;
+					        
+					        // Method runs Runge Kutta 4th Order for the current vehicle.
+					        vStar = velocity + dt/2 * ;
+					        xStar = xPos + dt/2 * velocity;
+					
+					        vStar2 = velocity + dt/2 * ;
+					        xStar2 = xPos + dt/2 * vStar;
+					
+					        vStar3 = velocity + dt * ;
+					        xStar3 = xPos + dt * vStar2;
+					
+					        vNew = velocity + dt/6 * 
+					               + 2 *  
+					               + 2 *  
+					               +     );
+					        
+					        xNew = xPos   +   dt/6*(velocity + 2*vStar + 2*vStar2 + vStar3);
+					        
+					        if(xNew >= xPosInFront + lengthVehinFront){
+					            crashflag = true;
+					        }
+					        */
 	        
 	        double vNew = velocity + dt*comfortAccel;
 	        if(vNew > maxVel) {
@@ -205,8 +211,11 @@ public class Vehicle {
 	        }
 	        double xNew = xPos + dt*vNew;
 	        velocity = vNew; 
-	        localxPos = localxPos + (xNew - xPos);
-	        xPos = xNew;
+		     // determining x,y coordinates using heading
+	        	heading = hdg;
+	        	xPos = Math.abs(xNew-localxPos) * Math.cos( Math.toRadians(heading));
+	        	yPos = Math.abs(xNew-localxPos) * Math.sin( Math.toRadians(heading));
+	        localxPos = xNew;
 	        
 	        //return crashflag;
     	}
@@ -216,10 +225,10 @@ public class Vehicle {
     public double getVelocity(){return velocity;} 	public void setVelocity(double vel){velocity=vel;}
     public double getxPos(){return xPos;} 			public void setxPos(double x){xPos=x;}
     public double getlocalxPos() { return localxPos; }	public void setlocalxPos(double localx){localxPos=localx;}
-    public int 	  getyLane(){return yLane;}			public void setyLane(int y){yLane=y;}
+    public double getyPos(){return yPos;}			public void setyPos(int y){yPos=y;}
     public boolean getCrashFlag(){return crashflag;}public void setCrashFlag(boolean crash){crashflag=crash;}
     
-    public double getMaxAccel() {return maxAccel;}
+    public double getMaxAccel() {return MAXACCEL;}
     public double getMaxVel() {return maxVel;}
     public double getComfortAccel() {return comfortAccel;}
     
