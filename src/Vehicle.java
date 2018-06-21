@@ -4,7 +4,6 @@
 
 // [1] make density dependent (ruleFollowing), [2] make +5 mph frequency variable (ruleFollowing)
 
-
 public class Vehicle {
 	
 	// VARIABLES
@@ -34,7 +33,7 @@ public class Vehicle {
 	        // Vehicle Real Motion
 	    	velocity = 0.0; 	xPos = 0.0;		localxPos = 0.0; 	yLane = 0; 		crashflag = false;
 	        // Vehicle Motion Limits
-	    	maxAccel = 2.0*32.2;	maxVel = 120*5280.0/3600.0;		comfortAccel = 1.5*32.2;
+	    	maxAccel = 4.0*32.2;	maxVel = 120*5280.0/3600.0;		comfortAccel = 1.5*32.2;
 	    	// Vehicle Parameters
 	    	lambda = 0.8;		length = 15;
 	    	// Vehhicle Styles and Rules
@@ -105,39 +104,30 @@ public class Vehicle {
     // GENERAL MOTION METHODS
     	public double accelFunct( double velofCurr, double posofCurr, double y, double velInFront, double posInFront, double dt){
 	        double vNew;
+	        double a;
 	        
-	        switch (followRungeType) {
-	        // Acceleration equation a = lambda*(velVehInFront - velCurrent)
-	            case 0:{
-	                vNew = y * (velInFront - velofCurr);
-	                if(     (vNew-velofCurr)/dt < 0 && (vNew-velofCurr)/dt < -maxAccel  )
-	                    vNew = velofCurr - maxAccel*dt;
-	                else if( (vNew-velofCurr)/dt > 0 && (vNew-velofCurr)/dt > maxAccel  )
-	                    vNew = velofCurr + maxAccel*dt;
-	                break;
-	            }
-	            case 1:
-	                vNew = y * ( posInFront - posofCurr);
-	                if(     (vNew-velofCurr)/dt < 0 && (vNew-velofCurr)/dt < -maxAccel  )
-	                    vNew = velofCurr - maxAccel*dt;
-	                else if( (vNew-velofCurr)/dt > 0 && (vNew-velofCurr)/dt > maxAccel  )
-	                    vNew = velofCurr + maxAccel*dt;
-	                break;
-	            case 2:
-	                vNew = y/(posInFront - posofCurr) * (velInFront - velofCurr);
-	                if(     (vNew-velofCurr)/dt < 0 && (vNew-velofCurr)/dt < -maxAccel  )
-	                    vNew = velofCurr - maxAccel*dt;
-	                else if( (vNew-velofCurr)/dt > 0 && (vNew-velofCurr)/dt > maxAccel  )
-	                    vNew = velofCurr + maxAccel*dt;
-	                break;
-	            default:
-	                vNew = 0.0;
-	                if(     (vNew-velofCurr)/dt < 0 && (vNew-velofCurr)/dt < -maxAccel  )
-	                    vNew = velofCurr - maxAccel*dt;
-	                else if( (vNew-velofCurr)/dt > 0 && (vNew-velofCurr)/dt > maxAccel  )
-	                    vNew = velofCurr + maxAccel*dt;
-	                break;
+	        if( followRungeType == 0) 		vNew = y * (velInFront - velofCurr);
+	        else if( followRungeType == 1)	vNew = y * ( posInFront - posofCurr);
+	        else if( followRungeType == 2)	vNew = y/(posInFront - posofCurr) * (velInFront - velofCurr);
+	        else 							vNew = 0.0;
+	        
+	        a = (vNew-velofCurr)/dt;
+	        
+	        if( a<0 ) {
+	        	// uses basic rule of keep comfortable if separation distance is spd/10*carlengths.. 7.0ft/s is 10mph
+	        	if( a<-comfortAccel 	&& (posInFront-posofCurr)<Math.abs(vNew/7.0*length) 	&& a<-maxAccel )
+	        		vNew = velofCurr - maxAccel*dt;
+	        	else if( a<-comfortAccel 	&& (posInFront-posofCurr)<Math.abs(vNew/7.0*length) )
+	        		vNew = velofCurr - comfortAccel*dt;
 	        }
+	        if( a>0 ) {
+	        	// uses basic rule of keep comfortable if separation distance is spd/10*carlengths.. 7.0ft/s is 10mph
+	        	if( a>comfortAccel 		&& Math.abs(posInFront-posofCurr)<Math.abs(vNew/7.0*length) 	&& a>maxAccel )
+	        		vNew = velofCurr + maxAccel*dt;
+	        	else if( a>comfortAccel 	&& Math.abs(posInFront-posofCurr)<Math.abs(vNew/7.0*length) )
+	        		vNew = velofCurr + comfortAccel*dt;
+	        }
+	        else	vNew = velofCurr;
 	        
 	        return vNew;
 	    }
@@ -236,7 +226,7 @@ public class Vehicle {
     public double getLambda(){return lambda;}
     public double getLength(){return length;}
     
-    public int getVehFollowType(){return followRungeType;}		public void setVehFollowType(int fltp){followRungeType=fltp;}
+    public int getVehRungeType(){return followRungeType;}		public void setVehRungeType(int runge){followRungeType=runge;}
     public float getAccelDriveType(){return accelDriveType;}	public void setAccelDriveType(float aDT) {accelDriveType=aDT;}
     public int getVehLaneChangeType(){return laneChangeType;}	public void setVehLaneChangeType(int lnchgtp){laneChangeType=lnchgtp;}
     public float getVehRuleType(){return ruleFollowType;} 		public void setVehRuleType(float rlfltp){ruleFollowType=rlfltp;}

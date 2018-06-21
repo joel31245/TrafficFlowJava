@@ -63,7 +63,7 @@ public class Lane {
 	    public void display() {
 			
 		}
-	    //simply adds cars that get passed into the method to its individual arraylist
+	    // adds cars that get passed into the method to its individual arraylist and SORTS
 	    public void addVehicleToLane(Vehicle car, double localx) { 
 	    	myCars.add(car);
 	    	myCars.get( myCars.size()-1 ).setlocalxPos(localx);
@@ -81,24 +81,30 @@ public class Lane {
 	    	} // end of sorting block
 	    }
 	    public void autoAddInputRate(double time) {
-	    	if( myCars.size() >= 1) {
-		    	if( myCars.get( myCars.size()-1 ).getlocalxPos() - myCars.get( myCars.size()-1 ).getLength() < 5)
-		    		if( time%inputRate == 0.0 ) {
-		    			Vehicle car = new Vehicle();
-		    			addVehicleToLane( car, 0.0 );
-		    			myCars.get( myCars.size()-1 ).setVelocity( inputSpeed );
-		    			myCars.get( myCars.size()-1 ).setVehRuleType( (float)(Math.random()+.95) );
-		    			myCars.get( myCars.size()-1 ).determineMaxSpeed(speedLimit);
-		    		}
+	    	boolean addCar = false;
+	    	
+	    	if( time%inputRate == 0.0 ) {
+		    	if( myCars.size() >= 1 ) {
+		    		int i = myCars.size()-1;
+		    		if( myCars.get(i).getlocalxPos() - myCars.get(i).getLength() > speedLimit/7*myCars.get(i).getLength() )
+		    			addCar = true;
+		    	}
+		    	else
+		    		addCar = true;
 	    	}
-	    	else 
-	    		if( time%inputRate == 0.0 ) {
-	    			Vehicle car = new Vehicle();
-	    			addVehicleToLane( car, 0.0 );
-	    			myCars.get( myCars.size()-1 ).setVelocity( inputSpeed );
-	    			myCars.get( myCars.size()-1 ).setVehRuleType( (float)(Math.random()+.95) );
-	    			myCars.get( myCars.size()-1 ).determineMaxSpeed(speedLimit);
-	    		}
+	    	
+	    	if(addCar == true) {
+	    		Vehicle car = new Vehicle();
+    			addVehicleToLane( car, 0.0 );
+    			myCars.get( myCars.size()-1 ).setVelocity( inputSpeed );
+    			myCars.get( myCars.size()-1 ).setVehRuleType(  (float)(Math.random()+.95)  );
+    			myCars.get( myCars.size()-1 ).setAccelDriveType(  (float)(Math.random()+.95)  ); 
+    			
+    			myCars.get( myCars.size()-1 ).determineMaxSpeed(speedLimit);
+    			myCars.get( myCars.size()-1 ).drivingStyle();
+    			addCar = false;
+	    	}
+	    	
 	    }
 	    public void removeVehicleFromLane(Vehicle car) { myCars.remove(car); }
 	    public void autoRemoveVehicleFromLane() { // change to local xPos
